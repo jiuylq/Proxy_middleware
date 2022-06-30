@@ -1,0 +1,39 @@
+
+===========================================================
+
+time: 2022-07-01 01:24:29
+params: {}
+url: /api/background/wechat_validate
+method: POST
+protocol: http
+res_headers: {"host":"192.168.31.227:3000","connection":"keep-alive","content-length":"2","accept":"application/json, text/plain, */*","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36","token":"null","content-type":"application/json;charset=UTF-8","origin":"http://192.168.31.227:3000","referer":"http://192.168.31.227:3000/","accept-encoding":"gzip, deflate","accept-language":"zh-CN,zh;q=0.9","cookie":"cna=71da14abfe4947e0a9312d3a8225300c; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%221815d1e711a2d-0b41cefa2baf5f8-26021b51-1049088-1815d1e711b28b%22%2C%22first_id%22%3A%22%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22url%E7%9A%84domain%E8%A7%A3%E6%9E%90%E5%A4%B1%E8%B4%A5%22%2C%22%24latest_search_keyword%22%3A%22url%E7%9A%84domain%E8%A7%A3%E6%9E%90%E5%A4%B1%E8%B4%A5%22%2C%22%24latest_referrer%22%3A%22url%E7%9A%84domain%E8%A7%A3%E6%9E%90%E5%A4%B1%E8%B4%A5%22%7D%2C%22%24device_id%22%3A%221815d1e711a2d-0b41cefa2baf5f8-26021b51-1049088-1815d1e711b28b%22%7D; isIframe=0; ttcid=2da0d61a8d64415c8d1dd051582d84cb10; MONITOR_WEB_ID=164346a4-39c9-4315-b32e-8ac4e887232d; _ga=GA1.4.441590636.1656429001; tt_scid=jsJwk2TQs76DY-HKtXLTStoCQVjU3retQQTGiBjtB7OIeGq53XURrgId2gYTnUHA2a3c","uid":"09e8a8cb-4b16-4ff7-aac6-9efd691732e3"}
+response: {
+    "code": 0,
+    "msg": "成功",
+    "data": {
+        "appid": "wxc3e65a3d9d6fdfc4",
+        "redirect_uri": "https://cashier-v4.debug.packertec.com"
+    },
+    "_t": 1656609874896,
+    "queries": 2
+}
+
+===========================================================
+
+uid: c1ee13e3-6fd3-4213-afd2-821537586a54
+time: 2022-07-01 01:25:29
+params: {}
+url: /api/background/wechat_validate
+method: POST
+protocol: http
+res_headers: {"host":"192.168.31.227:3000","connection":"keep-alive","content-length":"2","accept":"application/json, text/plain, */*","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36","token":"null","content-type":"application/json;charset=UTF-8","origin":"http://192.168.31.227:3000","referer":"http://192.168.31.227:3000/","accept-encoding":"gzip, deflate","accept-language":"zh-CN,zh;q=0.9","cookie":"cna=71da14abfe4947e0a9312d3a8225300c; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%221815d1e711a2d-0b41cefa2baf5f8-26021b51-1049088-1815d1e711b28b%22%2C%22first_id%22%3A%22%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22url%E7%9A%84domain%E8%A7%A3%E6%9E%90%E5%A4%B1%E8%B4%A5%22%2C%22%24latest_search_keyword%22%3A%22url%E7%9A%84domain%E8%A7%A3%E6%9E%90%E5%A4%B1%E8%B4%A5%22%2C%22%24latest_referrer%22%3A%22url%E7%9A%84domain%E8%A7%A3%E6%9E%90%E5%A4%B1%E8%B4%A5%22%7D%2C%22%24device_id%22%3A%221815d1e711a2d-0b41cefa2baf5f8-26021b51-1049088-1815d1e711b28b%22%7D; isIframe=0; ttcid=2da0d61a8d64415c8d1dd051582d84cb10; MONITOR_WEB_ID=164346a4-39c9-4315-b32e-8ac4e887232d; _ga=GA1.4.441590636.1656429001; tt_scid=jsJwk2TQs76DY-HKtXLTStoCQVjU3retQQTGiBjtB7OIeGq53XURrgId2gYTnUHA2a3c","uid":"c1ee13e3-6fd3-4213-afd2-821537586a54"}
+response: {
+    "code": 0,
+    "msg": "成功",
+    "data": {
+        "appid": "wxc3e65a3d9d6fdfc4",
+        "redirect_uri": "https://cashier-v4.debug.packertec.com"
+    },
+    "_t": 1656609934360,
+    "queries": 2
+}

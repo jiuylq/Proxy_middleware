@@ -8,6 +8,8 @@ const { v4: uuidv4 } = require('uuid');
 
 const utils = require('./utils/index.js');
 
+const config = require('./settings/config.js');
+
 const app = express();
 
 //这句代码需要在express.static上面
@@ -19,89 +21,52 @@ app.use('/static', express.static(path.join(__dirname, 'public')))
 
 // --------- 看这里 ↓ -------------------------
 
-// 凡是以 '/prod-api' 开头的都认定为 xhr 请求 
-// app.use('api', createProxyMiddleware({
-//   target: 'https://api.juejin.cn', // 这一行是你的服务端地址
-//   changeOrigin: true,
-//   // pathRewrite: {
-//   //   '^/prod-api': '' // 在向服务端发起请求时，去掉标识xhr的前缀
-//   // }
-// }));
 
-// // 其他请求则认定为前端资源请求，如：html/js/css 等
-// app.use('/', createProxyMiddleware({
-//   target: 'https://juejin.cn/',
-//   changeOrigin: true
-// }));
-// --------- 看这里 ↑ -------------------------
-let dataLog = ''
+let dataLog = {}
 const options = {
-  // target: 'http://packer-buffet.debug.packertec.com', // 目标地址
-  // target: 'http://yst.view868.vip/funny-booking', // 目标地址
-  // target: 'http://192.168.50.144:8080', // 目标地址
-  // target: 'http://192.168.50.29:8000', // tree
-  // target: 'https://background.debug.packertec.com', // background debug
   target: 'http://cashier-v4.debug.packertec.com',
-  // target: 'http://wechat-app.debug.packertec.com',
   changeOrigin: true, // 虚拟站点必须
-  // ws: true, // 代理websocket
-  // pathRewrite: {
-  //   '^/api/': '/api/', // 重写路径
-  // },
-  router: {
-    // when request.headers.host == 'dev.localhost:3000',
-    // override target 'http://www.example.org' to 'http://localhost:8000'
-    // 'dev.localhost:3000': 'http://localhost:8000'
-  //   'integration.localhost:3000' : 'http://localhost:8001',  // host only
-  //   'staging.localhost:3000'     : 'http://localhost:8002',  // host only
-  //   'localhost:3000/api'         : 'http://localhost:8003',  // host + path
-  //   '/rest'                      : 'http://localhost:8004'   // path only
-  // }
-  },
   selfHandleResponse: true, // res.end() will be called internally by responseInterceptor()
-  onProxyReq: onProxyReq,
-  // onProxyRes: onProxyRes,
+  onProxyReq: (proxyReq, req, res) => { // web
+    let uid = uuidv4();
+    proxyReq.setHeader('uid', uid);
+    req.headers.uid = uid
+    dataLog[uid] = "\n"+"==========================================================="+"\n\n"
+    dataLog[uid] += "uid: "+ uid +"\n";
+    dataLog[uid] += "time: "+ utils.parseTime(new Date()) +"\n";
+    let params = []
+    req.on('data', chunk => {
+        params.push(chunk)
+      });
+      req.on('end', () => {
+        try{
+          dataLog[uid] += 'params: ' + params.toString() + "\n"
+        }catch(e){
+          console.log('err')
+          //TODO handle the exception
+        }
+        
+      })
+    // or log the req
+  },
   onProxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
+    // console.log(req.headers.uid)
+    let uid = req.headers.uid
     const response = responseBuffer.toString('utf8'); // convert buffer to string
     const parsedUrl = url.parse(req.url)
-    dataLog += 'url: ' + parsedUrl.path + "\n"
-    dataLog += 'method: ' + req.method + "\n"
-    dataLog += 'protocol: ' + req.protocol + "\n"
-    dataLog += 'res_headers: ' + JSON.stringify(req.headers) + "\n"
-    dataLog += 'response: ' + response.toString() + "\n";
-    utils.appendFile("./logs/proxy_log_"+utils.parseTime(new Date(), '{y}-{m}-{d}')+".log", dataLog) 
+    dataLog[uid] += 'url: ' + parsedUrl.path + "\n"
+    dataLog[uid] += 'method: ' + req.method + "\n"
+    dataLog[uid] += 'protocol: ' + req.protocol + "\n"
+    dataLog[uid] += 'res_headers: ' + JSON.stringify(req.headers) + "\n"
+    dataLog[uid] += 'response: ' + response.toString() + "\n";
+    utils.appendFile("./logs/proxy_log_"+utils.parseTime(new Date(), '{y}-{m}-{d}')+".log", dataLog[uid]);
+    delete dataLog[uid];
     return response // manipulate response and return the result
   }),
   // onProxyReqWs: onProxyReqWs,
   // onOpen: onOpen,
   // onClose: onClose,
   // onError: onError
-}
-
-// web
-function onProxyReq(proxyReq, req, res) {
-  res.setHeader('x-proxyReq', 'proxyReq');
-  dataLog = "\n"+"==========================================================="+"\n\n"
-  dataLog += "time: "+ utils.parseTime(new Date())+"\n";
-  let params = []
-  req.on('data', chunk => {
-      params.push(chunk)
-    });
-    req.on('end', () => {
-      try{
-        dataLog += 'params: ' + params.toString() + "\n"
-      }catch(e){
-        console.log('err')
-        //TODO handle the exception
-      }
-      
-    })
-  // or log the req
-}
-function onProxyRes(proxyRes, req, res) {
-  proxyRes.headers['content-type'] = 'onProxyRes'; // add new header to response
-  // delete proxyRes.headers['x-added']; // remove header from response
-  // console.log(proxyRes)
 }
 
 // ws
@@ -128,7 +93,7 @@ function onError(err, req, res) {
 
 const httpProxy = createProxyMiddleware(options)
 
-
+// --------- 看这里 ↑ -------------------------
 
 // 设置跨域访问
 app.all("*", function (req, res, next) {
