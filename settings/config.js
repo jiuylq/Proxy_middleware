@@ -4,7 +4,7 @@ module.exports = {
     '/api': {
       target: 'http://cashier-v4.debug.packertec.com',
       // ws: true, // 代理websocket
-      changOrigin: true, // 虚拟站点必须
+      changeOrigin: true // 虚拟站点必须
       // pathRewrite: {
       //   '/api': '/'
       // },

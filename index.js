@@ -23,9 +23,9 @@ app.use('/static', express.static(path.join(__dirname, 'public')))
 
 
 let dataLog = {}
-const options = {
-  target: 'http://cashier-v4.debug.packertec.com',
-  changeOrigin: true, // 虚拟站点必须
+const defaultOptions = {
+  // target: 'http://cashier-v4.debug.packertec.com',
+  // changeOrigin: true, // 虚拟站点必须
   selfHandleResponse: true, // res.end() will be called internally by responseInterceptor()
   onProxyReq: (proxyReq, req, res) => { // web
     let uid = uuidv4();
@@ -91,8 +91,6 @@ function onError(err, req, res) {
   res.end({err:'error'});
 }
 
-const httpProxy = createProxyMiddleware(options)
-
 // --------- 看这里 ↑ -------------------------
 
 // 设置跨域访问
@@ -113,8 +111,15 @@ app.all("*", function (req, res, next) {
   else next();
 });
 
+// 创建代理
+Object.keys(config.proxy).forEach(key => {
+  const options = {
+    ...config.proxy[key],
+    ...defaultOptions
+  }
+  const httpProxy = createProxyMiddleware(options)
+  // 使用代理
+  app.use(key, httpProxy);
+})
 
-// 使用代理
-app.use('/api', httpProxy);
-
-app.listen(3000);
+app.listen(config.port);
