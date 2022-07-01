@@ -21,20 +21,22 @@ node index.js
 # 安装pm2
 npm install -g pm2
 
-# 开启代理
+# 开启代理，使用ecosystem.config.js的配置可以自动监听当前代理的配置和代码的变化并自动重启
 pm2 start ecosystem.config.js
+#or
+pm2 start index.js
 
 # 查看启动的代理
 pm2 list
 
 # 停止(id,name是在pm2 list中可以看到)
 pm2 stop id
-or
+#or
 pm2 stop name 
 
 # 删除pm2中的服务列表
 pm2 delete id
-or
+#or
 pm2 delete name
 
 # 重启服务
