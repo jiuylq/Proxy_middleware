@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path')
 const url = require('url');
 const { v4: uuidv4 } = require('uuid');
+const internalIp = require('internal-ip');
 
 const utils = require('./utils/index.js');
 
@@ -123,3 +124,6 @@ Object.keys(config.proxy).forEach(key => {
 })
 
 app.listen(config.port);
+
+console.log('\x1B[32m', `local：http://localhost:${config.port}`)
+console.log('\x1B[32m', `local：http://${internalIp.v4.sync() + ':' + config.port}`)
