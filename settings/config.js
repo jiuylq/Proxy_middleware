@@ -1,5 +1,7 @@
 module.exports = {
-  port: 3000,
+  port: 80,
+  https: true,
+  // host: '0.0.0.0', // default 0.0.0.0
   proxy: {
     '/api': {
       target: 'http://cashier-v4.debug.packertec.com',

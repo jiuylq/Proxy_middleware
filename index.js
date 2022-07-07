@@ -4,6 +4,7 @@ const history = require('connect-history-api-fallback'); // vue history解决
 const fs = require('fs');
 const path = require('path')
 const url = require('url');
+const https = require('https');
 const { v4: uuidv4 } = require('uuid');
 const internalIp = require('internal-ip');
 
@@ -21,6 +22,7 @@ app.use(express.static(path.join(__dirname, 'public'))) // 默认目录为'/'
 app.use('/static', express.static(path.join(__dirname, 'public')))
 
 // --------- 看这里 ↓ -------------------------
+
 
 
 let dataLog = {}
@@ -123,7 +125,18 @@ Object.keys(config.proxy).forEach(key => {
   app.use(key, httpProxy);
 })
 
-app.listen(config.port);
+if (config.https) {
+  const httpsoptions = {
+    key: fs.readFileSync(path.join(__dirname, './keys/private.pem')),
+    cert: fs.readFileSync(path.join(__dirname, './keys/file.crt'))
+  }
+  const httpsServer = https.createServer(httpsoptions, app);
+  httpsServer.listen(config.port);
+} else {
+  app.listen(config.port);
+}
 
-console.log('\x1B[32m', `local：http://localhost:${config.port}`)
-console.log('\x1B[32m', `local：http://${internalIp.v4.sync() + ':' + config.port}`)
+
+
+console.log('\x1B[32m', `local：${config.https?'https':'http'}://localhost:${config.port}`)
+console.log('\x1B[32m', `local：${config.https?'https':'http'}://${internalIp.v4.sync() + ':' + config.port}`)
