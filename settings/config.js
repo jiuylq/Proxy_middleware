@@ -1,14 +1,17 @@
 module.exports = {
   port: 80,
-  https: true,
+  // https: true,
   // host: '0.0.0.0', // default 0.0.0.0
+  referer: 'https://www.baidu.com',
+  origin: 'https://www.baidu.com',
+  log_name: 'v4_h5',
   proxy: {
-    '/api': {
-      target: 'http://cashier-v4.debug.packertec.com',
+    '/api': { // 20220220/q08uUF9s/index.m3u8
+      target: 'https://v4.cdtlas.com',
       // ws: true, // 代理websocket
-      changeOrigin: true // 虚拟站点必须
+      changeOrigin: true, // 虚拟站点必须
       // pathRewrite: {
-      //   '/api': '/'
+      //   '^/api': ''
       // },
       // router: {
       //   // when request.headers.host == 'dev.localhost:3000',

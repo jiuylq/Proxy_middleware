@@ -33,6 +33,8 @@ const defaultOptions = {
   onProxyReq: (proxyReq, req, res) => { // web
     let uid = uuidv4();
     proxyReq.setHeader('uid', uid);
+    proxyReq.setHeader('Origin', config.origin);
+    proxyReq.setHeader('Referer', config.referer);
     req.headers.uid = uid
     dataLog[uid] = "\n"+"==========================================================="+"\n\n"
     dataLog[uid] += "uid: "+ uid +"\n";
@@ -60,9 +62,15 @@ const defaultOptions = {
     dataLog[uid] += 'url: ' + parsedUrl.path + "\n"
     dataLog[uid] += 'method: ' + req.method + "\n"
     dataLog[uid] += 'protocol: ' + req.protocol + "\n"
-    dataLog[uid] += 'res_headers: ' + JSON.stringify(req.headers) + "\n"
+    dataLog[uid] += 'req_headers: ' + JSON.stringify(req.headers) + "\n"
+    dataLog[uid] += 'res_headers: ' + JSON.stringify(proxyRes.headers) + "\n"
     dataLog[uid] += 'response: ' + response.toString() + "\n";
-    utils.appendFile("./logs/proxy_log_"+utils.parseTime(new Date(), '{y}-{m}-{d}')+".log", dataLog[uid]);
+    utils.appendFile("./logs/proxy_log_"+ config.log_name + '_' +utils.parseTime(new Date(), '{y}-{m}-{d}')+".log", dataLog[uid]);
+    console.log('url', req.url)
+    console.log('time', utils.parseTime(new Date()))
+    console.log('headers req', JSON.stringify(req.headers))
+    console.log('headers res', JSON.stringify(proxyRes.headers))
+    console.log("===========================================================")
     delete dataLog[uid];
     return response // manipulate response and return the result
   }),
