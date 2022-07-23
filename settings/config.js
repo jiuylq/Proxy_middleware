@@ -1,13 +1,13 @@
 module.exports = {
-  port: 80,
+  port: 800,
   // https: true,
   // host: '0.0.0.0', // default 0.0.0.0
-  referer: 'https://www.baidu.com',
-  origin: 'https://www.baidu.com',
-  log_name: 'v4_h5',
+  logName: 'v4_h5',
   proxy: {
     '/api': { // 20220220/q08uUF9s/index.m3u8
       target: 'https://v4.cdtlas.com',
+      setHeader: true, // 是否设置请求头
+      secure: true,
       // ws: true, // 代理websocket
       changeOrigin: true, // 虚拟站点必须
       // pathRewrite: {

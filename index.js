@@ -26,60 +26,70 @@ app.use('/static', express.static(path.join(__dirname, 'public')))
 
 
 let dataLog = {}
-const defaultOptions = {
-  // target: 'http://cashier-v4.debug.packertec.com',
-  // changeOrigin: true, // 虚拟站点必须
-  selfHandleResponse: true, // res.end() will be called internally by responseInterceptor()
-  onProxyReq: (proxyReq, req, res) => { // web
-    let uid = uuidv4();
-    proxyReq.setHeader('uid', uid);
-    proxyReq.setHeader('Origin', config.origin);
-    proxyReq.setHeader('Referer', config.referer);
-    req.headers.uid = uid
-    dataLog[uid] = "\n"+"==========================================================="+"\n\n"
-    dataLog[uid] += "uid: "+ uid +"\n";
-    dataLog[uid] += "time: "+ utils.parseTime(new Date()) +"\n";
-    let params = []
-    req.on('data', chunk => {
-        params.push(chunk)
-      });
-      req.on('end', () => {
-        try{
-          dataLog[uid] += 'params: ' + params.toString() + "\n"
-        }catch(e){
-          console.log('err')
-          //TODO handle the exception
-        }
-        
-      })
-    // or log the req
-  },
-  onProxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
-    // console.log(req.headers.uid)
-    let uid = req.headers.uid
-    const response = responseBuffer.toString('utf8'); // convert buffer to string
-    const parsedUrl = url.parse(req.url)
-    dataLog[uid] += 'url: ' + parsedUrl.path + "\n"
-    dataLog[uid] += 'method: ' + req.method + "\n"
-    dataLog[uid] += 'protocol: ' + req.protocol + "\n"
-    dataLog[uid] += 'req_headers: ' + JSON.stringify(req.headers) + "\n"
-    dataLog[uid] += 'res_headers: ' + JSON.stringify(proxyRes.headers) + "\n"
-    dataLog[uid] += 'response: ' + response.toString() + "\n";
-    utils.appendFile("./logs/proxy_log_"+ config.log_name + '_' +utils.parseTime(new Date(), '{y}-{m}-{d}')+".log", dataLog[uid]);
-    console.log('url', req.url)
-    console.log('time', utils.parseTime(new Date()))
-    console.log('headers req', JSON.stringify(req.headers))
-    console.log('headers res', JSON.stringify(proxyRes.headers))
-    console.log("===========================================================")
-    delete dataLog[uid];
-    return response // manipulate response and return the result
-  }),
-  // onProxyReqWs: onProxyReqWs,
-  // onOpen: onOpen,
-  // onClose: onClose,
-  // onError: onError
-}
 
+function setOptions (opts) {
+  let defaultOptions = {
+    // target: 'http://cashier-v4.debug.packertec.com',
+    // changeOrigin: true, // 虚拟站点必须
+    selfHandleResponse: true, // res.end() will be called internally by responseInterceptor()
+    onProxyReq: (proxyReq, req, res) => { // web
+      let uid = uuidv4();
+      proxyReq.setHeader('uid', uid);
+      if (opts.setHeader) {
+        proxyReq.setHeader('Host', opts.target);
+        proxyReq.setHeader('Origin', opts.target);
+        proxyReq.setHeader('Referer', opts.target);
+      }
+      req.headers.uid = uid
+      dataLog[uid] = "\n"+"==========================================================="+"\n\n"
+      dataLog[uid] += "uid: "+ uid +"\n";
+      dataLog[uid] += "time: "+ utils.parseTime(new Date()) +"\n";
+      let params = []
+      req.on('data', chunk => {
+          params.push(chunk)
+        });
+        req.on('end', () => {
+          try{
+            dataLog[uid] += 'params: ' + params.toString() + "\n"
+          }catch(e){
+            console.log('err')
+            //TODO handle the exception
+          }
+          
+        })
+      // or log the req
+    },
+    onProxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
+      // console.log(req.headers.uid)
+      let uid = req.headers.uid
+      const response = responseBuffer.toString('utf8'); // convert buffer to string
+      const parsedUrl = url.parse(req.url)
+      dataLog[uid] += 'url: ' + parsedUrl.path + "\n"
+      dataLog[uid] += 'method: ' + req.method + "\n"
+      dataLog[uid] += 'protocol: ' + req.protocol + "\n"
+      dataLog[uid] += 'req_headers: ' + JSON.stringify(req.headers) + "\n"
+      dataLog[uid] += 'res_headers: ' + JSON.stringify(proxyRes.headers) + "\n"
+      dataLog[uid] += 'response: ' + response.toString() + "\n";
+      utils.appendFile("./logs/proxy_log_"+ config.logName + '_' +utils.parseTime(new Date(), '{y}-{m}-{d}')+".log", dataLog[uid]);
+      console.log('url', req.url)
+      console.log('time', utils.parseTime(new Date()))
+      console.log('headers req', JSON.stringify(req.headers))
+      console.log('headers res', JSON.stringify(proxyRes.headers))
+      console.log("===========================================================")
+      delete dataLog[uid];
+      return response // manipulate response and return the result
+    }),
+    // onProxyReqWs: onProxyReqWs,
+    // onOpen: onOpen,
+    // onClose: onClose,
+    // onError: onError
+  }
+  // delete opts.setHeader
+  return {
+    ...opts,
+    ...defaultOptions
+  }
+}
 // ws
 function onProxyReqWs(proxyReq, req, socket, options, head) {
   // add custom header
@@ -124,10 +134,7 @@ app.all("*", function (req, res, next) {
 
 // 创建代理
 Object.keys(config.proxy).forEach(key => {
-  const options = {
-    ...config.proxy[key],
-    ...defaultOptions
-  }
+  const options = setOptions(config.proxy[key])
   const httpProxy = createProxyMiddleware(options)
   // 使用代理
   app.use(key, httpProxy);
@@ -139,12 +146,32 @@ if (config.https) {
     cert: fs.readFileSync(path.join(__dirname, './keys/file.crt'))
   }
   const httpsServer = https.createServer(httpsoptions, app);
-  httpsServer.listen(config.port);
+  if (config.port) {
+    httpsServer.listen(config.port, config.host, listenCallback(true, config.port));
+  } else { // 如果开启了https但没指定端口，则同时启动默认https和http服务
+    httpsServer.listen(443, config.host, listenCallback(true));
+    app.listen(80, config.host, listenCallback);
+  }
 } else {
-  app.listen(config.port);
+  if (config.port) {
+    app.listen(config.port, config.host, listenCallback(false, config.port));
+  } else {
+    app.listen(80, config.host, listenCallback);
+  }
 }
 
 
-
-console.log('\x1B[32m', `local：${config.https?'https':'http'}://localhost:${config.port}`)
-console.log('\x1B[32m', `local：${config.https?'https':'http'}://${internalIp.v4.sync() + ':' + config.port}`)
+function listenCallback(https, port) {
+  port = port ? (':' + port) : ''
+  let ip = ''
+  if (config.host && config.host!=='0.0.0.0') {
+    ip = config.host
+  } else {
+    ip = internalIp.v4.sync()
+  }
+  console.log("\n")
+  console.log('\x1B[32m', https?'https':'http')
+  console.log('\x1B[32m', `local：${https?'https':'http'}://localhost${port}`)
+  console.log('\x1B[32m', `local：${https?'https':'http'}://${ip + port}`)
+  console.log("===========================================================\n")
+}
