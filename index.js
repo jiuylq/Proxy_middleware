@@ -10,7 +10,7 @@ const internalIp = require('internal-ip');
 
 const utils = require('./utils/index.js');
 
-const config = require('./settings/config.js');
+const config = require('./settings/index.js');
 
 const app = express();
 
@@ -84,7 +84,9 @@ function setOptions (opts) {
     // onClose: onClose,
     // onError: onError
   }
-  // delete opts.setHeader
+  if (opts.setHeader !== undefined) {
+    delete opts.setHeader
+  }
   return {
     ...opts,
     ...defaultOptions
@@ -142,8 +144,17 @@ Object.keys(config.proxy).forEach(key => {
 
 if (config.https) {
   const httpsoptions = {
-    key: fs.readFileSync(path.join(__dirname, './keys/private.pem')),
-    cert: fs.readFileSync(path.join(__dirname, './keys/file.crt'))
+    key: fs.readFileSync(path.join(__dirname, config.httpsCert.key)),
+    cert: fs.readFileSync(path.join(__dirname, config.httpsCert.cert))
+    // 双向验证的添加ca
+    // key: fs.readFileSync(path.join(__dirname, './keys/privkey.pem')),
+    // cert: fs.readFileSync(path.join(__dirname, './keys/fullchain.pem')),
+    // ca: [fs.readFileSync(path.join(__dirname, './keys/fullchain.cer'))]
+  }
+  if (config.httpsCert.ca && config.httpsCert.ca.length) {
+    httpsoptions.ca = config.httpsCert.ca.map(ca_path => {
+      return fs.readFileSync(path.join(__dirname, ca_path))
+    })
   }
   const httpsServer = https.createServer(httpsoptions, app);
   if (config.port) {
