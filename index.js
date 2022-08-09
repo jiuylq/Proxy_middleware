@@ -18,9 +18,10 @@ const app = express();
 app.use(history());
 
 // 设置静态资源目录
-app.use(express.static(path.join(__dirname, 'public'))) // 默认目录为'/'
-app.use('/static', express.static(path.join(__dirname, 'public')))
-
+if (!config.useStatic) {
+  app.use(express.static(path.join(__dirname, 'public'))) // 默认目录为'/'
+  app.use('/static', express.static(path.join(__dirname, 'public')))
+}
 // --------- 看这里 ↓ -------------------------
 
 
@@ -142,8 +143,24 @@ Object.keys(config.proxy).forEach(key => {
   app.use(key, httpProxy);
 })
 
+if (config.useStatic) {
+  app.use(config.staticProxy.path, createProxyMiddleware({
+    target: config.staticProxy.target,
+    secure: true,
+    // ws: true, // 代理websocket
+    changeOrigin: true, // 虚拟站点必须
+  }));
+}
+
 if (config.https) {
-  const httpsoptions = {
+  // const httpsoptions = {
+  //   // key: fs.readFileSync(path.join(__dirname, './keys/private.pem')),
+  //   // cert: fs.readFileSync(path.join(__dirname, './keys/file.crt'))
+  //   key: fs.readFileSync(path.join(__dirname, './keys/privkey.pem')),
+  //   cert: fs.readFileSync(path.join(__dirname, './keys/fullchain.pem')),
+  //   ca: [fs.readFileSync(path.join(__dirname, './keys/fullchain.cer'))]
+  // }
+  let httpsoptions = {
     key: fs.readFileSync(path.join(__dirname, config.httpsCert.key)),
     cert: fs.readFileSync(path.join(__dirname, config.httpsCert.cert))
     // 双向验证的添加ca

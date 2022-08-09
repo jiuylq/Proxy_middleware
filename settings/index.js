@@ -1,16 +1,21 @@
 module.exports = {
-  port: 800,
-  // https: true,
+  port: 9991,
+  https: false,
   httpsCert: {
-    key: './keys/private.pem',
-    cert: './keys/file.crt',
-    // ca: [],
+    key: '',
+    cert: '',
+    ca: []
+  },
+  useStatic: true, // 是否使用本地服务
+  staticProxy: {// 静态写死只有一个
+    target: 'http://192.168.50.151:8080', // 本地项目跑的地址
+    path: '/'
   },
   // host: '0.0.0.0', // default 0.0.0.0
-  logName: 'v4_h5',
+  logName: 'v4_h5_dev',
   proxy: {
-    '/api': { // 20220220/q08uUF9s/index.m3u8
-      target: 'https://v4.cdtlas.com',
+    '/api': {
+      target: 'https://test.com',
       setHeader: true, // 是否设置请求头
       secure: true,
       // ws: true, // 代理websocket
@@ -28,5 +33,5 @@ module.exports = {
       //   '/rest'                      : 'http://localhost:8004'   // path only
       // },
     }
-  }
+  }  
 }
