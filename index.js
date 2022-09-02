@@ -15,7 +15,9 @@ const config = require('./settings/index.js');
 const app = express();
 
 //这句代码需要在express.static上面
-app.use(history());
+if (config.useHistory) {
+  app.use(history());
+}
 
 // 设置静态资源目录
 if (!config.useStatic) {
@@ -42,16 +44,19 @@ function setOptions (opts) {
         proxyReq.setHeader('Referer', opts.target);
       }
       req.headers.uid = uid
-      dataLog[uid] = "\n"+"==========================================================="+"\n\n"
-      dataLog[uid] += "uid: "+ uid +"\n";
-      dataLog[uid] += "time: "+ utils.parseTime(new Date()) +"\n";
+      if (!dataLog[uid]) {
+        dataLog[uid] = {}
+      }
+      // dataLog[uid] = "\n"+"==========================================================="+"\n\n"
+      dataLog[uid].uid = uid;
+      dataLog[uid].time = utils.parseTime(new Date());
       let params = []
       req.on('data', chunk => {
           params.push(chunk)
         });
         req.on('end', () => {
           try{
-            dataLog[uid] += 'params: ' + params.toString() + "\n"
+            dataLog[uid].params = params.toString();
           }catch(e){
             console.log('err')
             //TODO handle the exception
@@ -65,18 +70,25 @@ function setOptions (opts) {
       let uid = req.headers.uid
       const response = responseBuffer.toString('utf8'); // convert buffer to string
       const parsedUrl = url.parse(req.url)
-      dataLog[uid] += 'url: ' + parsedUrl.path + "\n"
-      dataLog[uid] += 'method: ' + req.method + "\n"
-      dataLog[uid] += 'protocol: ' + req.protocol + "\n"
-      dataLog[uid] += 'req_headers: ' + JSON.stringify(req.headers) + "\n"
-      dataLog[uid] += 'res_headers: ' + JSON.stringify(proxyRes.headers) + "\n"
-      dataLog[uid] += 'response: ' + response.toString() + "\n";
-      utils.appendFile("./logs/proxy_log_"+ config.logName + '_' +utils.parseTime(new Date(), '{y}-{m}-{d}')+".log", dataLog[uid]);
-      console.log('url', req.url)
-      console.log('time', utils.parseTime(new Date()))
-      console.log('headers req', JSON.stringify(req.headers))
-      console.log('headers res', JSON.stringify(proxyRes.headers))
-      console.log("===========================================================")
+      dataLog[uid].url = parsedUrl.path;
+      dataLog[uid].method = req.method;
+      dataLog[uid].protocol = req.protocol;
+      dataLog[uid].req_headers = JSON.stringify(req.headers);
+      dataLog[uid].res_headers = JSON.stringify(proxyRes.headers);
+      dataLog[uid].response = response.toString();
+      let logText = ''
+      Object.keys(dataLog[uid]).forEach(key => {
+        logText += `${key}：${dataLog[uid][key]}\n`
+      })
+      logText += "===========================================================\n"
+      utils.appendFile("./logs/proxy_log_"+ config.logName + '_' +utils.parseTime(new Date(), '{y}-{m}-{d}')+".log", logText);
+      console.log('url：', dataLog[uid].url)
+      console.log('uid：', dataLog[uid].uid)
+      console.log('time：', dataLog[uid].time)
+      console.log('params：', dataLog[uid].params)
+      console.log('headers_req：', JSON.stringify(req.headers))
+      // console.log('response', dataLog[uid].response)
+      console.log("\n===========================================================\n")
       delete dataLog[uid];
       return response // manipulate response and return the result
     }),

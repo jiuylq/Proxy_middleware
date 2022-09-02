@@ -1,14 +1,15 @@
 module.exports = {
-  port: 9991,
+  port: 9999,
   https: false,
   httpsCert: {
     key: '',
     cert: '',
     ca: []
   },
-  useStatic: true, // 是否使用本地服务
+  useHistory: true, // 使用history模式
+  useStatic: false, // 是否使用本地服务
   staticProxy: {// 静态写死只有一个
-    target: 'http://192.168.50.151:8080', // 本地项目跑的地址
+    target: 'http://192.168.31.227:8080', // 本地项目跑的地址
     path: '/'
   },
   // host: '0.0.0.0', // default 0.0.0.0
